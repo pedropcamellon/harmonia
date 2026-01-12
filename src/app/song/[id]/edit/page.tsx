@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { songs } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Navigation } from "@/components/Navigation";
-import { SongEditorForm } from "./SongEditorForm";
+import { SongEditorForm } from "@/app/new/SongEditorForm";
 
 export default async function EditSongPage({
   params,
