@@ -8,9 +8,10 @@ import { SongEditorForm } from "@/app/new/SongEditorForm";
 export default async function EditSongPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const id = parseInt(params.id);
+  const resolvedParams = await params;
+  const id = parseInt(resolvedParams.id);
   const [song] = await db.select().from(songs).where(eq(songs.id, id));
 
   if (!song) {

@@ -8,7 +8,7 @@ import { SongDetailsClient } from "./SongDetailsClient";
 export default async function SongDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
   const id = parseInt(resolvedParams.id);

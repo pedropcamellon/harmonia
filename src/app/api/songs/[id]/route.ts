@@ -15,10 +15,11 @@ const updateSongSchema = z.object({
 // GET /api/songs/[id] - Get a single song
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     const [song] = await db.select().from(songs).where(eq(songs.id, id));
 
     if (!song) {
@@ -41,10 +42,11 @@ export async function GET(
 // PUT /api/songs/[id] - Update a song
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     const body = await request.json();
     const input = updateSongSchema.parse(body);
 
@@ -96,10 +98,11 @@ export async function PUT(
 // DELETE /api/songs/[id] - Delete a song
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     await db.delete(songs).where(eq(songs.id, id));
 
     return new NextResponse(null, { status: 204 });
