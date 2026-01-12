@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Music2 } from "lucide-react";
 import { SongList } from "./SongList";
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const allSongs = await db.select().from(songs).orderBy(songs.updatedAt);
 
