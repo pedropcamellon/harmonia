@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Music, Plus, Home } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+
+import { NavLink } from "./NavLink";
 
 export function Navigation() {
   const pathname = usePathname();
@@ -25,7 +26,7 @@ export function Navigation() {
             <Home className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Library</span>
           </NavLink>
-          
+
           <Link href="/new">
             <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 active:translate-y-0">
               <Plus className="w-4 h-4" />
@@ -35,20 +36,5 @@ export function Navigation() {
         </div>
       </div>
     </nav>
-  );
-}
-
-function NavLink({ href, active, children }: { href: string, active: boolean, children: React.ReactNode }) {
-  return (
-    <Link href={href}>
-      <div className={cn(
-        "flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer",
-        active 
-          ? "bg-secondary text-secondary-foreground shadow-sm" 
-          : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-      )}>
-        {children}
-      </div>
-    </Link>
   );
 }
