@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"chat.checkpoints.showFileChanges": true,
+		"github.copilot.chat.codeGeneration.instructions": [
+			{
+				"file": ".github/copilot_plans/active_plan.instructions.md"
+			}
+		]
+	}
+}
