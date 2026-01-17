@@ -13,7 +13,7 @@ interface SongViewProps {
 
 export function SongView({ lines, transpose, className }: SongViewProps) {
   return (
-    <div className={cn("space-y-1 font-mono text-lg", className)}>
+    <div className={cn("space-y-1 font-mono text-sm md:text-lg w-full", className)}>
       {lines.map((line, lineIndex) => (
         <LineRenderer 
           key={lineIndex} 
@@ -47,7 +47,7 @@ function LineRenderer({ line, transpose, index }: { line: SongLine; transpose: n
     if (sortedChords.length === 0) {
       return (
         <div 
-          className="text-foreground/80 leading-relaxed whitespace-pre-wrap"
+          className="text-foreground/80 leading-relaxed whitespace-pre-wrap break-words"
         >
           {line.content || " "}
         </div>
@@ -59,7 +59,7 @@ function LineRenderer({ line, transpose, index }: { line: SongLine; transpose: n
         className="relative mt-12 mb-6 group"
       >
         {/* Lyrics Line */}
-        <div className="text-foreground/90 whitespace-pre-wrap leading-relaxed font-medium pt-1">
+        <div className="text-foreground/90 whitespace-pre-wrap leading-relaxed font-medium pt-1 break-words">
           {line.content || "\u00A0"}
         </div>
         
