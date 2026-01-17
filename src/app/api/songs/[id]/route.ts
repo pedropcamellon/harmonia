@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { songs } from "@/db/schema";
 import { parseRawContent, detectKey } from "@/lib/chord-parser";
@@ -79,6 +80,9 @@ export async function PUT(
       );
     }
 
+    revalidatePath('/');
+    revalidatePath(`/song/${id}`);
+
     return NextResponse.json(updatedSong);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -104,6 +108,8 @@ export async function DELETE(
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
     await db.delete(songs).where(eq(songs.id, id));
+
+    revalidatePath('/');
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {

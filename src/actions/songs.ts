@@ -27,6 +27,9 @@ export async function createSong(formData: FormData) {
       updatedAt: new Date(),
     }).returning();
 
+    revalidatePath('/');
+    revalidatePath('/new');
+
     return newSong;
   } catch (error) {
     console.error("Error creating song:", error);

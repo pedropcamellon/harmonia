@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { songs, insertSongSchema } from "@/db/schema";
 import { parseRawContent, detectKey } from "@/lib/chord-parser";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
 
 // GET /api/songs - List all songs
 export async function GET() {
@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     }).returning();
 
+    revalidatePath('/');
+    
     return NextResponse.json(newSong, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
