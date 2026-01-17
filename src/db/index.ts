@@ -4,10 +4,16 @@ import * as schema from './schema';
 import fs from 'fs';
 import path from 'path';
 
-if (!process.env.DATABASE_HOST || !process.env.DATABASE_USER || !process.env.DATABASE_PASSWORD || !process.env.DATABASE_NAME) {
-    throw new Error(
-        'Database connection variables must be set (DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME)',
-    );
+// Check if database variables are set, but don't throw - allow app to start
+const hasDbConfig = !!(
+    process.env.DATABASE_HOST && 
+    process.env.DATABASE_USER && 
+    process.env.DATABASE_PASSWORD && 
+    process.env.DATABASE_NAME
+);
+
+if (!hasDbConfig) {
+    console.warn('[DB] Database connection variables not fully configured. App will run with limited functionality.');
 }
 
 const getPoolConfig = () => {
@@ -47,5 +53,6 @@ const getPoolConfig = () => {
     return config;
 };
 
-export const pool = new Pool(getPoolConfig());
-export const db = drizzle(pool, { schema });
+// Only create pool if config is available
+export const pool = hasDbConfig ? new Pool(getPoolConfig()) : null;
+export const db = pool ? drizzle(pool, { schema }) : null as any;
