@@ -21,6 +21,9 @@ const buttonVariants = cva(
         secondary: "border bg-secondary text-secondary-foreground border border-secondary-border ",
         // Add a transparent border so that when someone toggles a border on later, it doesn't shift layout/size.
         ghost: "border border-transparent",
+        // Soft variants (no hard borders, subtle backgrounds)
+        soft: "bg-primary/10 text-primary hover:bg-primary/20 border border-transparent shadow-none",
+        "soft-destructive": "bg-destructive/10 text-destructive hover:bg-destructive/20 border border-transparent shadow-none",
       },
       // Heights are set as "min" heights, because sometimes Ai will place large amount of content
       // inside buttons. With a min-height they will look appropriate with small amounts of content,
