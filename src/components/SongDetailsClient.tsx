@@ -11,6 +11,7 @@ import { transposeChord } from "@/lib/chord-utils";
 import { SongControls } from "@/components/SongControls";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SongActions } from "@/components/SongActions";
+import { Button } from "@/components/ui/button";
 
 // Types
 import type { Song } from "@/db/schema";
@@ -49,11 +50,16 @@ export function SongDetailsClient({ song }: SongDetailsClientProps) {
     <main className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Header Section */}
       <div className="mb-6">
-        <Link href="/">
-          <div className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4 cursor-pointer transition-colors no-print">
+        <Button
+          variant="link"
+          size="none"
+          className="mb-4 no-print"
+          asChild
+        >
+          <Link href="/">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Library
-          </div>
-        </Link>
+          </Link>
+        </Button>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1.5 flex-1 min-w-0">

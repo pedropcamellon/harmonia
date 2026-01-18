@@ -1,9 +1,10 @@
-import { notFound } from "next/navigation";
-import { db } from "@/db";
-import { songs } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
+
+import { db } from "@/db";
 import { Navigation } from "@/components/Navigation";
-import { SongDetailsClient } from "./SongDetailsClient";
+import { SongDetailsClient } from "@/components/SongDetailsClient";
+import { songs } from "@/db/schema";
 
 export default async function SongDetailsPage({
   params,

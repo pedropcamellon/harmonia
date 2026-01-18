@@ -3,7 +3,7 @@ import { songs, type Song } from "@/db/schema";
 import { Navigation } from "@/components/Navigation";
 import Link from "next/link";
 import { Music2 } from "lucide-react";
-import { SongList } from "./SongList";
+import { SongList } from "@/components/SongList";
 
 export default async function Home() {
   let allSongs: Song[] = [];

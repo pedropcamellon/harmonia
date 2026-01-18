@@ -24,6 +24,7 @@ const buttonVariants = cva(
         // Soft variants (no hard borders, subtle backgrounds)
         soft: "bg-primary/10 text-primary hover:bg-primary/20 border border-transparent shadow-none",
         "soft-destructive": "bg-destructive/10 text-destructive hover:bg-destructive/20 border border-transparent shadow-none",
+        link: "text-muted-foreground hover:text-foreground hover:bg-transparent border-transparent shadow-none",
       },
       // Heights are set as "min" heights, because sometimes Ai will place large amount of content
       // inside buttons. With a min-height they will look appropriate with small amounts of content,
@@ -33,6 +34,7 @@ const buttonVariants = cva(
         sm: "min-h-8 rounded-md px-3 text-xs",
         lg: "min-h-10 rounded-md px-8",
         icon: "h-9 w-9",
+        none: "h-auto p-0",
       },
     },
     defaultVariants: {
