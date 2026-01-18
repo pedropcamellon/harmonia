@@ -73,12 +73,12 @@ export function SongDetailsClient({ song }: SongDetailsClientProps) {
             </div>
 
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground/80">
-              {song.language && (
+              {/* TODO {song.language && (
                 <div className="flex items-center gap-1.5 bg-secondary/50 px-2 py-0.5 rounded-full capitalize text-xs font-medium">
                   <Globe className="w-3 h-3" />
                   {song.language}
                 </div>
-              )}
+              )} */}
               <span className="hidden sm:inline text-muted-foreground/30">•</span>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-sm">
                 <span className="flex items-center gap-1.5" title="Added">
