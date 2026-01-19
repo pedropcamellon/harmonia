@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Globe, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 
 import { SongView } from "@/components/SongView";
 import { transposeChord } from "@/lib/chord-utils";
@@ -12,6 +12,7 @@ import { SongControls } from "@/components/SongControls";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SongActions } from "@/components/SongActions";
 import { Button } from "@/components/ui/button";
+import { deleteSong } from "@/lib/song-api";
 
 // Types
 import type { Song } from "@/db/schema";
@@ -33,14 +34,9 @@ export function SongDetailsClient({ song }: SongDetailsClientProps) {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/songs/${song.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        router.push('/');
-        router.refresh();
-      }
+      await deleteSong(song.id);
+      router.push('/');
+      router.refresh();
     } catch (error) {
       console.error("Error deleting song:", error);
     }

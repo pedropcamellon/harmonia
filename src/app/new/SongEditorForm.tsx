@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 
+import { createSong, updateSong } from "@/lib/song-api";
+
+// Types
 import type { Song } from "@/db/schema";
 
 type EditorMode = 'create' | 'edit';
@@ -19,7 +22,7 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
 
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
-  const [key, setKey] = useState(song?.key || "C");
+  const [key, setKey] = useState(song?.key || "");
   const [rawContent, setRawContent] = useState(song?.rawContent || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -44,21 +47,11 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
     setIsSaving(true);
 
     try {
-      const method = editorMode === 'edit' ? "PUT" : "POST";
-      const url = editorMode === 'edit' ? `/api/songs/${song.id}` : "/api/songs";
+      const songData = { title, artist, key, rawContent };
+      const savedSong = editorMode === 'edit'
+        ? await updateSong(song!.id, songData)
+        : await createSong(songData);
 
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, artist, key, rawContent }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to save song");
-      }
-
-      const savedSong = await response.json();
       router.push(`/song/${savedSong.id}`);
       router.refresh();
     } catch (error) {
