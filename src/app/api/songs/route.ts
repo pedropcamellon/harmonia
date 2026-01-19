@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { db } from "@/db";
-import { songs, insertSongSchema } from "@/db/schema";
-import { parseRawContent, detectKey } from "@/lib/chord-parser";
 import { z } from "zod";
+
+import { db } from "@/db";
+import { detectKey } from "@/lib/key-detection";
+import { parseRawContent } from "@/lib/chord-parser";
+import { songs, insertSongSchema } from "@/db/schema";
 
 // GET /api/songs - List all songs
 export async function GET() {
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
     const input = insertSongSchema.parse(body);
 
     const structuredContent = parseRawContent(input.rawContent);
-    const detectedKey = input.key && input.key !== 'C' ? input.key : detectKey(structuredContent);
+    const detectedKey = input.key ? input.key : detectKey(structuredContent);
 
     const [newSong] = await db.insert(songs).values({
       title: input.title,
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
     }).returning();
 
     revalidatePath('/');
-    
+
     return NextResponse.json(newSong, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {

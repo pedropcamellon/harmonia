@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { db } from "@/db";
-import { songs } from "@/db/schema";
-import { parseRawContent, detectKey } from "@/lib/chord-parser";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
+
+import { db } from "@/db";
+import { detectKey } from "@/lib/key-detection";
+import { eq } from "drizzle-orm";
+import { parseRawContent } from "@/lib/chord-parser";
+import { songs } from "@/db/schema";
 
 const updateSongSchema = z.object({
   title: z.string().optional(),

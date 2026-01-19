@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
 import { songs } from "@/db/schema";
-import { parseRawContent, detectKey } from "@/lib/chord-parser";
+import { parseRawContent } from "@/lib/chord-parser";
+import { detectKey } from "@/lib/key-detection";
 
 export async function createSong(formData: FormData) {
   try {
@@ -16,7 +17,7 @@ export async function createSong(formData: FormData) {
 
     const input = { title, artist, key, rawContent };
     const structuredContent = parseRawContent(input.rawContent);
-    const detectedKey = input.key && input.key !== 'C' ? input.key : detectKey(structuredContent);
+    const detectedKey = input.key || detectKey(structuredContent);
 
     const [newSong] = await db.insert(songs).values({
       title: input.title,
@@ -54,6 +55,7 @@ export async function updateSong(id: number, data: {
     const structuredContent = parseRawContent(data.rawContent);
     updateData.structuredContent = structuredContent;
 
+    // Auto-detect key if not explicitly provided
     if (!data.key) {
       updateData.key = detectKey(structuredContent);
     }

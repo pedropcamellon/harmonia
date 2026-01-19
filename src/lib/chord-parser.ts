@@ -1,31 +1,54 @@
+/**
+ * Chord and Lyrics Parser
+ * 
+ * Parses raw song text into a structured format that separates chords from lyrics.
+ * 
+ * Algorithm:
+ * 
+ * 1. Chord Line Detection:
+ *    - Uses regex to identify lines that contain chord symbols
+ *    - A line is considered a "chord line" if >50% of its tokens match the chord pattern
+ *    - Excludes section headers (lines starting with '[' or ending with ':')
+ * 
+ * 2. Chord Pattern Matching:
+ *    - Recognizes: Root notes (A-G), accidentals (#/b), qualities (m/maj/min/dim/aug/sus)
+ *    - Supports: Extensions (7, 9, 11, 13), additions (add9, sus4), slash chords (C/G)
+ *    - Examples: C, Am7, Dsus4, Gmaj7, F#m, C/G
+ * 
+ * 3. Content Structuring:
+ *    - Merges chord lines with their corresponding lyric lines below
+ *    - Preserves exact character positions for chord alignment
+ *    - Identifies section headers (e.g., [Verse], [Chorus])
+ *    - Maintains empty lines for formatting
+ * 
+ * 4. Output Format:
+ *    Each line becomes a SongLine object with:
+ *    - type: 'lyric' | 'heading' | 'empty'
+ *    - content: The lyric text or heading
+ *    - chords: Array of {chord: string, position: number} for alignment
+ * 
+ * Example Input:
+ * ```
+ * [Verse 1]
+ * Em                G
+ * Today is gonna be the day
+ * ```
+ * 
+ * Example Output:
+ * ```
+ * [
+ *   { type: 'heading', content: '[Verse 1]', chords: [] },
+ *   { type: 'lyric', content: 'Today is gonna be the day', 
+ *     chords: [{ chord: 'Em', position: 0 }, { chord: 'G', position: 18 }] }
+ * ]
+ * ```
+ */
+
+// Types
 import { type SongLine, type ChordBlock } from "@/db/schema";
 
 // Regex for common chords
 const chordRegex = /^[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|M)?(?:[0-9]|1[0-3])?(?:(?:add|no|sus)[0-9]+)?(?:[-+][0-9])?(?:\/[A-G](?:#|b)?)?$/;
-
-export function detectKey(structured: SongLine[]): string {
-    const chordCounts: Record<string, number> = {};
-    let firstChord: string | null = null;
-
-    for (const line of structured) {
-        for (const cb of line.chords) {
-            // Normalize chord for key detection (e.g., Am7 -> Am, G/B -> G)
-            const baseChord = cb.chord.split('/')[0].replace(/[0-9]/g, '');
-            if (!firstChord) firstChord = baseChord;
-            chordCounts[baseChord] = (chordCounts[baseChord] || 0) + 1;
-        }
-    }
-
-    const sorted = Object.entries(chordCounts).sort((a, b) => b[1] - a[1]);
-
-    // Heuristic: If first chord is among the top 2 most frequent, it's likely the key
-    if (firstChord && sorted.length > 0) {
-        const topChords = sorted.slice(0, 2).map(e => e[0]);
-        if (topChords.includes(firstChord)) return firstChord;
-    }
-
-    return sorted.length > 0 ? sorted[0][0] : 'C';
-}
 
 // Simple parser logic
 export function isChordLine(line: string): boolean {
