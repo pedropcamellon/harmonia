@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { ArrowLeft, Save, Wand2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Link from "next/link";
+
 import type { Song } from "@/db/schema";
+
+type EditorMode = 'create' | 'edit';
 
 interface SongEditorFormProps {
   song?: Song;
@@ -12,8 +15,8 @@ interface SongEditorFormProps {
 
 export function SongEditorForm({ song }: SongEditorFormProps) {
   const router = useRouter();
-  const isEditing = !!song;
-  
+  const editorMode: EditorMode = song ? 'edit' : 'create';
+
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
   const [key, setKey] = useState(song?.key || "C");
@@ -24,7 +27,7 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
+
     if (!title.trim()) {
       setErrors({ title: "Title is required" });
       return;
@@ -41,9 +44,9 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
     setIsSaving(true);
 
     try {
-      const method = isEditing ? "PUT" : "POST";
-      const url = isEditing ? `/api/songs/${song.id}` : "/api/songs";
-      
+      const method = editorMode === 'edit' ? "PUT" : "POST";
+      const url = editorMode === 'edit' ? `/api/songs/${song.id}` : "/api/songs";
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -68,9 +71,9 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <Link href={isEditing ? `/song/${song.id}` : "/"}>
+      <Link href={editorMode === 'edit' ? `/song/${song.id}` : "/"}>
         <div className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4 cursor-pointer transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-1" /> {isEditing ? "Back to Song" : "Back to Library"}
+          <ArrowLeft className="w-4 h-4 mr-1" /> {editorMode === 'edit' ? "Back to Song" : "Back to Library"}
         </div>
       </Link>
 
@@ -165,7 +168,7 @@ That they're gonna throw it back to you...`}
       )}
 
       <div className="flex justify-end gap-4 pt-4">
-        <Link href={isEditing ? `/song/${song.id}` : "/"}>
+        <Link href={editorMode === 'edit' ? `/song/${song.id}` : "/"}>
           <button
             type="button"
             className="px-6 py-3 rounded-xl bg-secondary text-secondary-foreground font-medium hover:bg-secondary/80 transition-colors"
@@ -186,7 +189,7 @@ That they're gonna throw it back to you...`}
           ) : (
             <>
               <Save className="w-4 h-4" />
-              {isEditing ? "Update Song" : "Create Song"}
+              {editorMode === 'edit' ? "Update Song" : "Create Song"}
             </>
           )}
         </button>
