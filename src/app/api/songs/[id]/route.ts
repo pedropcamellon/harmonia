@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { detectKey } from "@/lib/key-detection";
+import { extractChordsFromSong } from "@/lib/chord-parser";
 import { eq } from "drizzle-orm";
 import { parseRawContent } from "@/lib/chord-parser";
 import { songs } from "@/db/schema";
@@ -65,7 +66,8 @@ export async function PUT(
       updateData.structuredContent = structuredContent;
 
       if (!input.key) {
-        updateData.key = detectKey(structuredContent);
+        const chords = extractChordsFromSong(structuredContent);
+        updateData.key = detectKey(chords).key;
       }
     }
 

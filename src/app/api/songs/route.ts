@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { detectKey } from "@/lib/key-detection";
+import { extractChordsFromSong } from "@/lib/chord-parser";
 import { parseRawContent } from "@/lib/chord-parser";
 import { songs, insertSongSchema } from "@/db/schema";
 
@@ -28,7 +29,8 @@ export async function POST(request: NextRequest) {
     const input = insertSongSchema.parse(body);
 
     const structuredContent = parseRawContent(input.rawContent);
-    const detectedKey = input.key ? input.key : detectKey(structuredContent);
+    const chords = extractChordsFromSong(structuredContent);
+    const detectedKey = input.key ? input.key : detectKey(chords).key;
 
     const [newSong] = await db.insert(songs).values({
       title: input.title,

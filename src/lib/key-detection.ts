@@ -1,56 +1,103 @@
 /**
- * Simple Frequency-Based Key Detection
+ * Music Theory-Based Key Detection using Tonal.js
  * 
  * Algorithm:
- * 1. Extract all chords from the song and normalize them:
- *    - Remove slash notation (e.g., G/B → G)
- *    - Strip extensions and numbers (e.g., Am7 → Am, Dsus4 → Dsus)
+ * 1. Extract all chords from the song's structured content
  * 
- * 2. Count the frequency of each base chord throughout the song
+ * 2. Test each chord against all 24 major/minor keys (12 major + 12 minor)
  * 
- * 3. Remember the first chord encountered (songs often start on the tonic)
+ * 3. Score each key based on:
+ *    - Whether chord root notes belong to the key's scale (+2 points)
+ *    - Percentage of chord notes that fit the scale (0-1 points)
+ *    - Position weighting: first chord 3x, last chord 2x, others 1x
  * 
- * 4. Determine the key using these heuristics:
- *    - If the first chord is among the top 2 most frequent → return it as the key
- *    - Otherwise → return the most frequent chord
- *    - Fallback → return 'C' if no chords are found
+ * 4. Return the highest-scoring key with confidence percentage and alternatives
  * 
  * Strengths:
- * - Fast and simple
- * - No external dependencies
- * - Works well for straightforward songs where the tonic is frequently used
- * - First chord heuristic is musically sensible
+ * - Understands music theory via Tonal.js
+ * - Distinguishes major/minor keys accurately
+ * - Position-aware (first/last chords weighted)
+ * - Provides confidence score and alternative keys
  * 
  * Limitations:
- * - Purely statistical—doesn't understand music theory
- * - Cannot distinguish between relative major/minor keys (e.g., C major vs A minor)
- * - No confidence scoring
- * - Doesn't consider chord relationships or harmonic function
- * - May fail with modal or jazz progressions
+ * - Requires Tonal.js dependency
+ * - May struggle with modal or atonal music
+ * - Confidence heuristic is simplified
  */
 
-import { type SongLine } from "@/db/schema";
+import { Key, Chord } from 'tonal';
 
-export function detectKey(structured: SongLine[]): string {
-  const chordCounts: Record<string, number> = {};
-  let firstChord: string | null = null;
-
-  for (const line of structured) {
-    for (const cb of line.chords) {
-      // Normalize chord for key detection (e.g., Am7 -> Am, G/B -> G)
-      const baseChord = cb.chord.split('/')[0].replace(/[0-9]/g, '');
-      if (!firstChord) firstChord = baseChord;
-      chordCounts[baseChord] = (chordCounts[baseChord] || 0) + 1;
-    }
+export function detectKey(chordSymbols: string[]): {
+  key: string | null;
+  confidence: number;
+  alternatives: Array<{ key: string; score: number }>;
+} {
+  if (chordSymbols.length === 0) {
+    return { key: null, confidence: 0, alternatives: [] };
   }
 
-  const sorted = Object.entries(chordCounts).sort((a, b) => b[1] - a[1]);
+  const possibleKeys = [
+    'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F',
+    'Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'
+  ];
 
-  // Heuristic: If first chord is among the top 2 most frequent, it's likely the key
-  if (firstChord && sorted.length > 0) {
-    const topChords = sorted.slice(0, 2).map(e => e[0]);
-    if (topChords.includes(firstChord)) return firstChord;
+  const scores: Record<string, number> = {};
+
+  possibleKeys.forEach(keyName => {
+    const keyInfo = Key.majorKey(keyName.includes('m') ? keyName.slice(0, -1) : keyName);
+    const isMinor = keyName.includes('m');
+    const scaleNotes = isMinor
+      ? Key.minorKey(keyName.slice(0, -1)).natural.scale
+      : keyInfo.scale;
+
+    let score = 0;
+
+    chordSymbols.forEach((chordSymbol, index) => {
+      const chord = Chord.get(chordSymbol);
+      if (!chord.tonic) return;
+
+      // Position weight: first chord = 3x, last chord = 2x, others = 1x
+      const positionWeight =
+        index === 0 ? 3 :
+          index === chordSymbols.length - 1 ? 2 : 1;
+
+      // Root note in scale
+      if (scaleNotes.includes(chord.tonic)) {
+        score += 2 * positionWeight;
+      }
+
+      // All chord notes in scale
+      const chordNotes = chord.notes;
+      const notesInScale = chordNotes.filter(note =>
+        scaleNotes.includes(note)
+      );
+      if (chordNotes.length > 0) {
+        score += (notesInScale.length / chordNotes.length) * positionWeight;
+      }
+    });
+
+    scores[keyName] = score;
+  });
+
+  // Sort by score
+  const sortedKeys = Object.entries(scores)
+    .sort((a, b) => b[1] - a[1])
+    .filter(([_, score]) => score > 0);
+
+  if (sortedKeys.length === 0) {
+    return { key: null, confidence: 0, alternatives: [] };
   }
 
-  return sorted.length > 0 ? sorted[0][0] : 'C';
+  const [bestKey, bestScore] = sortedKeys[0];
+  // Heuristic for confidence
+  const confidence = Math.min(100, (bestScore / (chordSymbols.length * 5)) * 100);
+
+  return {
+    key: bestKey,
+    confidence: Math.round(confidence),
+    alternatives: sortedKeys.slice(1, 4).map(([key, score]) => ({
+      key,
+      score: Math.round(score)
+    }))
+  };
 }

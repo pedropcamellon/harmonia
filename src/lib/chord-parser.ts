@@ -50,7 +50,12 @@ import { type SongLine, type ChordBlock } from "@/db/schema";
 // Regex for common chords
 const chordRegex = /^[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|M)?(?:[0-9]|1[0-3])?(?:(?:add|no|sus)[0-9]+)?(?:[-+][0-9])?(?:\/[A-G](?:#|b)?)?$/;
 
-// Simple parser logic
+/**
+ * Determines if a line of text is a chord line (vs lyrics or headers).
+ * Uses heuristic: if >50% of whitespace-separated tokens match chord pattern, it's a chord line.
+ * @param line - Raw text line to analyze
+ * @returns True if line is primarily chords
+ */
 export function isChordLine(line: string): boolean {
     if (!line.trim()) return false;
     // Common header identifiers or non-chord lines
@@ -64,6 +69,12 @@ export function isChordLine(line: string): boolean {
     return chordCount >= tokens.length / 2;
 }
 
+/**
+ * Extracts chords with their character positions from a single line of text.
+ * Internal helper for parseRawContent.
+ * @param line - Chord line text (e.g., "Em        G")
+ * @returns Array of chord objects with positions: [{chord: "Em", position: 0}, {chord: "G", position: 10}]
+ */
 function extractChords(line: string): ChordBlock[] {
     const chords: ChordBlock[] = [];
     const regex = /[^\s]+/g;
@@ -77,6 +88,28 @@ function extractChords(line: string): ChordBlock[] {
     return chords;
 }
 
+/**
+ * Flattens structured song content to extract just the chord names.
+ * Used for key detection and chord analysis.
+ * @param structuredContent - Parsed song structure from parseRawContent
+ * @returns Flat array of chord names: ["Em", "G", "D", "Am"]
+ */
+export function extractChordsFromSong(structuredContent: SongLine[]): string[] {
+    const chords: string[] = [];
+    structuredContent.forEach(line => {
+        line.chords.forEach(chordBlock => {
+            chords.push(chordBlock.chord);
+        });
+    });
+    return chords;
+}
+
+/**
+ * Parses raw song text into structured format with chords aligned to lyrics.
+ * See file header documentation for detailed algorithm explanation.
+ * @param raw - Raw song text with chords and lyrics
+ * @returns Structured array of song lines with type, content, and chord positions
+ */
 export function parseRawContent(raw: string): SongLine[] {
     const lines = raw.split('\n');
     const structured: SongLine[] = [];

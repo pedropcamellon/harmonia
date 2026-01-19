@@ -4,9 +4,10 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { songs } from "@/db/schema";
-import { parseRawContent } from "@/lib/chord-parser";
 import { detectKey } from "@/lib/key-detection";
+import { extractChordsFromSong } from "@/lib/chord-parser";
+import { parseRawContent } from "@/lib/chord-parser";
+import { songs } from "@/db/schema";
 
 export async function createSong(formData: FormData) {
   try {
@@ -17,7 +18,8 @@ export async function createSong(formData: FormData) {
 
     const input = { title, artist, key, rawContent };
     const structuredContent = parseRawContent(input.rawContent);
-    const detectedKey = input.key || detectKey(structuredContent);
+    const chords = extractChordsFromSong(structuredContent);
+    const detectedKey = input.key || detectKey(chords).key;
 
     const [newSong] = await db.insert(songs).values({
       title: input.title,
@@ -57,7 +59,8 @@ export async function updateSong(id: number, data: {
 
     // Auto-detect key if not explicitly provided
     if (!data.key) {
-      updateData.key = detectKey(structuredContent);
+      const chords = extractChordsFromSong(structuredContent);
+      updateData.key = detectKey(chords).key;
     }
   }
 

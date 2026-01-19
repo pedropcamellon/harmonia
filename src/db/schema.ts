@@ -1,4 +1,4 @@
-import { pgTable, text, serial, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, jsonb, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -19,6 +19,8 @@ export const songs = pgTable("songs", {
     title: text("title").notNull(),
     artist: text("artist").notNull(),
     key: text("key").default('C'),
+    detectedKey: text("detected_key"),
+    keyConfidence: integer("key_confidence"),
     rawContent: text("raw_content").notNull(), // The original text input
     structuredContent: jsonb("structured_content").$type<SongLine[]>().notNull(), // The parsed JSON
     language: text("language"), // Detected language
