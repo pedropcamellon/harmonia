@@ -10,8 +10,8 @@
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file=.env.local src/db/migrate.ts",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
+    "db:push": "cross-env NODE_EXTRA_CA_CERTS=prod-ca-2021.crt drizzle-kit push",
+    "db:studio": "cross-env NODE_EXTRA_CA_CERTS=prod-ca-2021.crt drizzle-kit studio",
     "db:setup": "pnpm db:push && pnpm db:seed",
     "db:seed": "tsx --env-file=.env.local src/db/seed.ts"
   },
