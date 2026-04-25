@@ -10,7 +10,7 @@ import { createSong, updateSong } from "@/lib/song-api";
 // Types
 import type { Song } from "@/db/schema";
 
-type EditorMode = 'create' | 'edit';
+type EditorMode = "create" | "edit";
 
 interface SongEditorFormProps {
   song?: Song;
@@ -18,7 +18,7 @@ interface SongEditorFormProps {
 
 export function SongEditorForm({ song }: SongEditorFormProps) {
   const router = useRouter();
-  const editorMode: EditorMode = song ? 'edit' : 'create';
+  const editorMode: EditorMode = song ? "edit" : "create";
 
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
@@ -48,15 +48,18 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
 
     try {
       const songData = { title, artist, key, rawContent };
-      const savedSong = editorMode === 'edit'
-        ? await updateSong(song!.id, songData)
-        : await createSong(songData);
+      const savedSong =
+        editorMode === "edit"
+          ? await updateSong(song!.id, songData)
+          : await createSong(songData);
 
       router.push(`/song/${savedSong.id}`);
       router.refresh();
     } catch (error) {
       console.error("Error saving song:", error);
-      setErrors({ submit: error instanceof Error ? error.message : "Failed to save song" });
+      setErrors({
+        submit: error instanceof Error ? error.message : "Failed to save song",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -64,9 +67,10 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <Link href={editorMode === 'edit' ? `/song/${song.id}` : "/"}>
+      <Link href={editorMode === "edit" && song ? `/song/${song.id}` : "/"}>
         <div className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4 cursor-pointer transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-1" /> {editorMode === 'edit' ? "Back to Song" : "Back to Library"}
+          <ArrowLeft className="w-4 h-4 mr-1" />{" "}
+          {editorMode === "edit" ? "Back to Song" : "Back to Library"}
         </div>
       </Link>
 
@@ -74,7 +78,9 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
         {/* Meta Fields */}
         <div className="md:col-span-8 space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-foreground uppercase tracking-wider">Title</label>
+            <label className="text-sm font-bold text-foreground uppercase tracking-wider">
+              Title
+            </label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -82,13 +88,17 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
               placeholder="e.g. Wonderwall"
             />
             {errors.title && (
-              <p className="text-sm text-destructive font-medium">{errors.title}</p>
+              <p className="text-sm text-destructive font-medium">
+                {errors.title}
+              </p>
             )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-foreground uppercase tracking-wider">Artist</label>
+              <label className="text-sm font-bold text-foreground uppercase tracking-wider">
+                Artist
+              </label>
               <input
                 value={artist}
                 onChange={(e) => setArtist(e.target.value)}
@@ -96,12 +106,16 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
                 placeholder="e.g. Oasis"
               />
               {errors.artist && (
-                <p className="text-sm text-destructive font-medium">{errors.artist}</p>
+                <p className="text-sm text-destructive font-medium">
+                  {errors.artist}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-foreground uppercase tracking-wider">Key</label>
+              <label className="text-sm font-bold text-foreground uppercase tracking-wider">
+                Key
+              </label>
               <input
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
@@ -121,15 +135,21 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
             </div>
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex gap-2">
-                <span className="font-mono bg-background px-1 rounded border border-border h-fit text-xs">Amaj7</span>
+                <span className="font-mono bg-background px-1 rounded border border-border h-fit text-xs">
+                  Amaj7
+                </span>
                 <span>Write chords directly above lyrics.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-mono bg-background px-1 rounded border border-border h-fit text-xs">[Chorus]</span>
+                <span className="font-mono bg-background px-1 rounded border border-border h-fit text-xs">
+                  [Chorus]
+                </span>
                 <span>Use square brackets for section headers.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-mono bg-background px-1 rounded border border-border h-fit text-xs">Am  G</span>
+                <span className="font-mono bg-background px-1 rounded border border-border h-fit text-xs">
+                  Am G
+                </span>
                 <span>Align chords using spaces for best results.</span>
               </li>
             </ul>
@@ -138,7 +158,9 @@ export function SongEditorForm({ song }: SongEditorFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-bold text-foreground uppercase tracking-wider">Lyrics & Chords</label>
+        <label className="text-sm font-bold text-foreground uppercase tracking-wider">
+          Lyrics & Chords
+        </label>
         <textarea
           value={rawContent}
           onChange={(e) => setRawContent(e.target.value)}
@@ -150,7 +172,9 @@ Today is gonna be the day
 That they're gonna throw it back to you...`}
         />
         {errors.rawContent && (
-          <p className="text-sm text-destructive font-medium">{errors.rawContent}</p>
+          <p className="text-sm text-destructive font-medium">
+            {errors.rawContent}
+          </p>
         )}
       </div>
 
@@ -161,7 +185,7 @@ That they're gonna throw it back to you...`}
       )}
 
       <div className="flex justify-end gap-4 pt-4">
-        <Link href={editorMode === 'edit' ? `/song/${song.id}` : "/"}>
+        <Link href={editorMode === "edit" && song ? `/song/${song.id}` : "/"}>
           <button
             type="button"
             className="px-6 py-3 rounded-xl bg-secondary text-secondary-foreground font-medium hover:bg-secondary/80 transition-colors"
@@ -182,7 +206,7 @@ That they're gonna throw it back to you...`}
           ) : (
             <>
               <Save className="w-4 h-4" />
-              {editorMode === 'edit' ? "Update Song" : "Create Song"}
+              {editorMode === "edit" ? "Update Song" : "Create Song"}
             </>
           )}
         </button>
