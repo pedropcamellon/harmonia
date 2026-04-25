@@ -17,24 +17,23 @@ services:
       timeout: 5s
       retries: 5
 
-  # Uncomment to run the Next.js app in Docker (optional)
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: harmonia-app
-  #   restart: unless-stopped
-  #   environment:
-  #     - DATABASE_URL=postgresql://harmonia:harmonia_dev_password@postgres:5432/harmonia
-  #     - NODE_ENV=development
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   volumes:
-  #     - ./src:/app/src
-  #     - ./public:/app/public
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: harmonia-app
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://harmonia:harmonia_dev_password@postgres:5432/harmonia
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
 
 volumes:
   postgres_data:
