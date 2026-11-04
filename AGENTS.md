@@ -1,4 +1,8 @@
-# Harmonia Copilot Instructions
+# Harmonia Agent
+
+Harmonia is a lyrics with chord management app. It helps transpose chords and detect keys.
+
+## Tech Stack
 
 Next.js 15 App Router, TypeScript, JSON file storage, Tailwind CSS 4. Chord management/songbook app.
 
