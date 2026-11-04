@@ -1,9 +1,14 @@
 import { mkdir, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 import type { Song } from "@/lib/song-schema";
 
-const dataDirectory = process.env.HARMONIA_DATA_DIR || path.join(process.cwd(), "data");
+const dataDirectory = process.env.HARMONIA_DATA_DIR || (
+  process.env.VERCEL === "1"
+    ? path.join(tmpdir(), "harmonia", "data")
+    : path.join(process.cwd(), "data")
+);
 const songsDirectory = path.join(dataDirectory, "songs");
 const legacySongsFile = path.join(dataDirectory, "songs.json");
 let writeQueue = Promise.resolve();

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Music2 } from "lucide-react";
 import { SongList } from "@/components/SongList";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const allSongs = await listSongs();
 

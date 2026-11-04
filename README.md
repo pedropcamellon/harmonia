@@ -74,8 +74,14 @@ Open [http://localhost:3000](http://localhost:3000). Docker Compose stores songs
 
 1. Push to GitHub
 2. Import project in Vercel
-3. Configure a persistent filesystem; Vercel's default function filesystem is not durable
+3. Remove any manually configured `NODE_ENV` variable; Vercel sets it automatically
 4. Deploy
+
+On Vercel, songs are stored in temporary files under `/tmp/harmonia/data/songs/`.
+They can disappear at any time and are not shared across function instances or deployments.
+This mode is only for temporary personal testing, not a durable song library.
+Docker and local development continue to use persistent `data/` storage.
+`HARMONIA_DATA_DIR` can override the storage directory in either environment.
 
 ### Other Platforms
 
