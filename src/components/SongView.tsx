@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from 'react';
-import { type SongLine } from '@/db/schema';
+import { type SongLine } from '@/lib/song-schema';
 import { transposeChord } from '@/lib/chord-utils';
 import { cn } from '@/lib/utils';
 

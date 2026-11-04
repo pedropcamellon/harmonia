@@ -1,13 +1,12 @@
 "use server";
 
-import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-import { db } from "@/db";
 import { detectKey } from "@/lib/key-detection";
 import { extractChordsFromSong } from "@/lib/chord-parser";
 import { parseRawContent } from "@/lib/chord-parser";
-import { songs } from "@/db/schema";
+import { createSong as saveSong, deleteSong as removeSong, updateSong as saveSongChanges } from "@/lib/song-store";
+import type { Song } from "@/lib/song-schema";
 
 export async function createSong(formData: FormData) {
   try {
@@ -21,14 +20,16 @@ export async function createSong(formData: FormData) {
     const chords = extractChordsFromSong(structuredContent);
     const detectedKey = input.key || detectKey(chords).key;
 
-    const [newSong] = await db.insert(songs).values({
+    const newSong = await saveSong({
       title: input.title,
       artist: input.artist,
       key: detectedKey,
+      detectedKey,
+      keyConfidence: null,
       rawContent: input.rawContent,
       structuredContent,
-      updatedAt: new Date(),
-    }).returning();
+      language: null,
+    });
 
     revalidatePath('/');
     revalidatePath('/new');
@@ -46,7 +47,7 @@ export async function updateSong(id: number, data: {
   key?: string;
   rawContent?: string;
 }) {
-  const updateData: any = { updatedAt: new Date() };
+  const updateData: Partial<Song> = {};
 
   if (data.title) updateData.title = data.title;
   if (data.artist) updateData.artist = data.artist;
@@ -64,11 +65,7 @@ export async function updateSong(id: number, data: {
     }
   }
 
-  const [updatedSong] = await db
-    .update(songs)
-    .set(updateData)
-    .where(eq(songs.id, id))
-    .returning();
+  const updatedSong = await saveSongChanges(id, updateData);
 
   if (!updatedSong) {
     throw new Error("Song not found");
@@ -81,6 +78,6 @@ export async function updateSong(id: number, data: {
 }
 
 export async function deleteSong(id: number): Promise<void> {
-  await db.delete(songs).where(eq(songs.id, id));
+  await removeSong(id);
   revalidatePath("/");
 }

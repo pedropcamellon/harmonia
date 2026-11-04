@@ -1,6 +1,6 @@
 # Harmonia Copilot Instructions
 
-Next.js 15 App Router, TypeScript, PostgreSQL/Drizzle ORM, Tailwind CSS 4. Chord management/songbook app.
+Next.js 15 App Router, TypeScript, JSON file storage, Tailwind CSS 4. Chord management/songbook app.
 
 ## File Naming
 
@@ -12,11 +12,9 @@ Next.js 15 App Router, TypeScript, PostgreSQL/Drizzle ORM, Tailwind CSS 4. Chord
 
 Raw text → `chord-parser.ts` → structured JSON with chord positions → `key-detection.ts` → detected key
 
-## Database
+## Storage
 
-- PostgreSQL with SSL via `prod-ca-2021.crt` in root
-- Use `pnpm db:push` / `pnpm db:studio` (uses `NODE_EXTRA_CA_CERTS`)
-- Never use `NODE_TLS_REJECT_UNAUTHORIZED=0`
+- Each song is persisted in `data/songs/artist-title.json` (numeric suffix on collisions); Docker uses a named volume mounted at `/app/data`.
 - Always `revalidatePath()` after mutations
 
 ## Patterns

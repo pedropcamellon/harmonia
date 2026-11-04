@@ -8,7 +8,7 @@ import Link from "next/link";
 import { createSong, updateSong } from "@/lib/song-api";
 
 // Types
-import type { Song } from "@/db/schema";
+import type { Song } from "@/lib/song-schema";
 
 type EditorMode = "create" | "edit";
 

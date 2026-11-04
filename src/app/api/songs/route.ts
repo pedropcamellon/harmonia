@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { db } from "@/db";
 import { detectKey } from "@/lib/key-detection";
 import { extractChordsFromSong } from "@/lib/chord-parser";
 import { parseRawContent } from "@/lib/chord-parser";
-import { songs, insertSongSchema } from "@/db/schema";
+import { insertSongSchema } from "@/lib/song-schema";
+import { createSong, listSongs } from "@/lib/song-store";
 
 // GET /api/songs - List all songs
 export async function GET() {
   try {
-    const allSongs = await db.select().from(songs).orderBy(songs.updatedAt);
+    const allSongs = await listSongs();
     return NextResponse.json(allSongs);
   } catch (error) {
     console.error("Error fetching songs:", error);
@@ -32,14 +32,16 @@ export async function POST(request: NextRequest) {
     const chords = extractChordsFromSong(structuredContent);
     const detectedKey = input.key ? input.key : detectKey(chords).key;
 
-    const [newSong] = await db.insert(songs).values({
+    const newSong = await createSong({
       title: input.title,
       artist: input.artist,
       key: detectedKey,
+      detectedKey,
+      keyConfidence: null,
       rawContent: input.rawContent,
       structuredContent,
-      updatedAt: new Date(),
-    }).returning();
+      language: null,
+    });
 
     revalidatePath('/');
 

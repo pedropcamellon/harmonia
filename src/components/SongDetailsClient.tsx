@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { deleteSong } from "@/lib/song-api";
 
 // Types
-import type { Song } from "@/db/schema";
+import type { Song } from "@/lib/song-schema";
 
 interface SongDetailsClientProps {
   song: Song;

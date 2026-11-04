@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { db } from "@/db";
 import { detectKey } from "@/lib/key-detection";
 import { extractChordsFromSong } from "@/lib/chord-parser";
-import { eq } from "drizzle-orm";
 import { parseRawContent } from "@/lib/chord-parser";
-import { songs } from "@/db/schema";
+import { deleteSong, getSong, updateSong } from "@/lib/song-store";
+import type { Song } from "@/lib/song-schema";
 
 const updateSongSchema = z.object({
   title: z.string().optional(),
@@ -24,7 +23,7 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
-    const [song] = await db.select().from(songs).where(eq(songs.id, id));
+    const song = await getSong(id);
 
     if (!song) {
       return NextResponse.json(
@@ -54,7 +53,7 @@ export async function PUT(
     const body = await request.json();
     const input = updateSongSchema.parse(body);
 
-    const updateData: any = { updatedAt: new Date() };
+    const updateData: Partial<Song> = {};
 
     if (input.title) updateData.title = input.title;
     if (input.artist) updateData.artist = input.artist;
@@ -71,11 +70,7 @@ export async function PUT(
       }
     }
 
-    const [updatedSong] = await db
-      .update(songs)
-      .set(updateData)
-      .where(eq(songs.id, id))
-      .returning();
+    const updatedSong = await updateSong(id, updateData);
 
     if (!updatedSong) {
       return NextResponse.json(
@@ -111,7 +106,10 @@ export async function DELETE(
   try {
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
-    await db.delete(songs).where(eq(songs.id, id));
+    const deleted = await deleteSong(id);
+    if (!deleted) {
+      return NextResponse.json({ error: "Song not found" }, { status: 404 });
+    }
 
     revalidatePath('/');
 

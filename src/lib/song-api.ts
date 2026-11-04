@@ -1,5 +1,5 @@
 // Client-side API calls for song operations
-import type { Song } from "@/db/schema";
+import type { Song } from "@/lib/song-schema";
 
 export type CreateSongInput = {
   title: string;

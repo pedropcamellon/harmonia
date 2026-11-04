@@ -45,7 +45,7 @@
  */
 
 // Types
-import { type SongLine, type ChordBlock } from "@/db/schema";
+import { type SongLine, type ChordBlock } from "@/lib/song-schema";
 
 // Regex for common chords
 const chordRegex = /^[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|M)?(?:[0-9]|1[0-3])?(?:(?:add|no|sus)[0-9]+)?(?:[-+][0-9])?(?:\/[A-G](?:#|b)?)?$/;

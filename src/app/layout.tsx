@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Harmonia - Chord Sheet Manager",
-  description: "A chord sheet manager with real-time transposition, automatic key detection, and PostgreSQL storage for musicians and worship teams.",
+  description: "A chord sheet manager with real-time transposition, automatic key detection, and local song storage for musicians and worship teams.",
 };
 
 export default function RootLayout({

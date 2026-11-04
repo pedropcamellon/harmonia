@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Song } from "@/db/schema";
+import type { Song } from "@/lib/song-schema";
 
 interface SongListProps {
   initialSongs: Song[];

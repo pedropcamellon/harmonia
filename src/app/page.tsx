@@ -1,19 +1,11 @@
-import { db } from "@/db";
-import { songs, type Song } from "@/db/schema";
+import { listSongs } from "@/lib/song-store";
 import { Navigation } from "@/components/Navigation";
 import Link from "next/link";
 import { Music2 } from "lucide-react";
 import { SongList } from "@/components/SongList";
 
 export default async function Home() {
-  let allSongs: Song[] = [];
-
-  try {
-    allSongs = await db.select().from(songs).orderBy(songs.updatedAt);
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    // Return empty array - UI will show "No songs yet" message
-  }
+  const allSongs = await listSongs();
 
   return (
     <div className="min-h-screen bg-background">

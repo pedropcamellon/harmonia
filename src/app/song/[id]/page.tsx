@@ -1,10 +1,8 @@
-import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
-import { db } from "@/db";
 import { Navigation } from "@/components/Navigation";
 import { SongDetailsClient } from "@/components/SongDetailsClient";
-import { songs } from "@/db/schema";
+import { getSong } from "@/lib/song-store";
 
 export default async function SongDetailsPage({
   params,
@@ -13,7 +11,7 @@ export default async function SongDetailsPage({
 }) {
   const resolvedParams = await params;
   const id = parseInt(resolvedParams.id);
-  const [song] = await db.select().from(songs).where(eq(songs.id, id));
+  const song = await getSong(id);
 
   if (!song) {
     notFound();

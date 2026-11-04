@@ -6,7 +6,7 @@ A modern chord management and songbook application built with Next.js 15, featur
 
 - **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
-- **Database:** PostgreSQL with Drizzle ORM
+- **Storage:** One local JSON file per song (`data/songs/artist-title.json`)
 - **Styling:** Tailwind CSS 4
 - **Package Manager:** pnpm
 
@@ -24,7 +24,6 @@ A modern chord management and songbook application built with Next.js 15, featur
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
 - pnpm
 
 ### Installation
@@ -42,31 +41,25 @@ A modern chord management and songbook application built with Next.js 15, featur
    pnpm install
    ```
 
-3. Set up environment variables:
-
-   ```bash
-   cp .env.local.example .env.local
-   ```
-
-   Update `.env.local` with your database connection:
-
-   ```
-   DATABASE_URL=postgresql://user:password@localhost:5432/harmonia
-   ```
-
-4. Push database schema:
-
-   ```bash
-   pnpm db:push
-   ```
-
-5. Run the development server:
+3. Run the development server:
 
    ```bash
    pnpm dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+Each song is stored in its own `artist-title.json` file under `data/songs/`. Names are normalized to filesystem-safe slugs; filename collisions receive a numeric suffix. Editing the artist or title renames the file. Existing numeric filenames remain readable. The directory is created automatically, and existing `data/songs.json` data is migrated on first access.
+
+### Docker
+
+Run the production container with persistent storage:
+
+```bash
+docker compose up --build
+```
+
+Open [http://localhost:3000](http://localhost:3000). Docker Compose stores songs in the `harmonia_data` named volume. To remove the container and its song data, run `docker compose down --volumes`.
 
 ## Scripts
 
@@ -74,29 +67,19 @@ A modern chord management and songbook application built with Next.js 15, featur
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
-- `pnpm db:push` - Push database schema changes
-- `pnpm db:studio` - Open Drizzle Studio
 
 ## Deployment
 
-### Vercel (Recommended)
+### Vercel
 
 1. Push to GitHub
 2. Import project in Vercel
-3. Add `DATABASE_URL` environment variable
+3. Configure a persistent filesystem; Vercel's default function filesystem is not durable
 4. Deploy
 
 ### Other Platforms
 
-Ensure your hosting platform supports:
-
-- Node.js 18+
-- PostgreSQL database
-- Environment variables
-
-## Contributing
-
-Contributions are welcome! Please open issues and pull requests for improvements and bug fixes.
+Ensure your hosting platform supports Node.js 18+ and persistent writable storage at `data/`. The JSON store is intended for a single application instance; use a shared database for multi-instance deployments.
 
 ## License
 
