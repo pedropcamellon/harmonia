@@ -3,6 +3,8 @@ import { getSong } from "@/lib/song-store";
 import { Navigation } from "@/components/Navigation";
 import { SongEditorForm } from "@/app/new/SongEditorForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditSongPage({
   params,
 }: {

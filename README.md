@@ -74,14 +74,17 @@ Open [http://localhost:3000](http://localhost:3000). Docker Compose stores songs
 
 1. Push to GitHub
 2. Import project in Vercel
-3. Remove any manually configured `NODE_ENV` variable; Vercel sets it automatically
-4. Deploy
+3. In the project's Storage tab, create or connect a **private Vercel Blob store**. Enable its `BLOB_READ_WRITE_TOKEN` environment variable for Production and Preview
+4. Remove any manually configured `NODE_ENV` variable; Vercel sets it automatically
+5. Redeploy after connecting the store
 
-On Vercel, songs are stored in temporary files under `/tmp/harmonia/data/songs/`.
-They can disappear at any time and are not shared across function instances or deployments.
-This mode is only for temporary personal testing, not a durable song library.
-Docker and local development continue to use persistent `data/` storage.
-`HARMONIA_DATA_DIR` can override the storage directory in either environment.
+On Vercel, songs are stored as private JSON blobs at `songs/<id>/artist-title.json`.
+The ID directory keeps identically named songs separate and preserves stable links when titles change.
+Reads bypass the Blob CDN cache so edits are visible immediately across function instances.
+Missing Blob configuration is reported as an error, rather than falling back to temporary storage.
+Songs previously saved in `/tmp` cannot be recovered automatically.
+Docker and local development use persistent `data/` storage unless `BLOB_READ_WRITE_TOKEN` is set.
+`HARMONIA_DATA_DIR` can override the local storage directory. Never expose the Blob token to client code.
 
 ### Other Platforms
 

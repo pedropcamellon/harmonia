@@ -1,14 +1,12 @@
 import { mkdir, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { randomInt } from "node:crypto";
 import path from "node:path";
+import { del, get, list, put } from "@vercel/blob";
 
 import type { Song } from "@/lib/song-schema";
 
-const dataDirectory = process.env.HARMONIA_DATA_DIR || (
-  process.env.VERCEL === "1"
-    ? path.join(tmpdir(), "harmonia", "data")
-    : path.join(process.cwd(), "data")
-);
+const useBlobStorage = process.env.VERCEL === "1" || !!process.env.BLOB_READ_WRITE_TOKEN;
+const dataDirectory = process.env.HARMONIA_DATA_DIR || path.join(process.cwd(), "data");
 const songsDirectory = path.join(dataDirectory, "songs");
 const legacySongsFile = path.join(dataDirectory, "songs.json");
 let writeQueue = Promise.resolve();
@@ -32,6 +30,20 @@ function filenamePart(value: string): string {
 }
 
 async function writeSong(song: Song): Promise<void> {
+  if (useBlobStorage) {
+    const entries = await readBlobSongs(`songs/${song.id}/`);
+    const pathname = `songs/${song.id}/${filenamePart(song.artist)}-${filenamePart(song.title)}.json`;
+    await put(pathname, JSON.stringify(song, null, 2), {
+      access: "private",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType: "application/json",
+    });
+    const oldPaths = entries.filter((entry) => entry.filename !== pathname).map((entry) => entry.filename);
+    if (oldPaths.length) await del(oldPaths);
+    return;
+  }
+
   await mkdir(songsDirectory, { recursive: true });
   const entries = await readSongFiles();
   const baseName = `${filenamePart(song.artist)}-${filenamePart(song.title)}`;
@@ -72,6 +84,7 @@ async function migrateLegacySongs(): Promise<void> {
 }
 
 function ensureLegacySongsMigrated(): Promise<void> {
+  if (useBlobStorage) return Promise.resolve();
   legacyMigration ??= migrateLegacySongs().catch((error: unknown) => {
     legacyMigration = undefined;
     throw error;
@@ -79,7 +92,35 @@ function ensureLegacySongsMigrated(): Promise<void> {
   return legacyMigration;
 }
 
+async function readBlobSongs(prefix = "songs/"): Promise<{ filename: string; song: Song }[]> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error("Connect a private Vercel Blob store and set BLOB_READ_WRITE_TOKEN.");
+  }
+
+  const entries: { filename: string; song: Song }[] = [];
+  let cursor: string | undefined;
+  do {
+    const result = await list({ prefix, cursor });
+    const songs = await Promise.all(result.blobs
+      .filter((blob) => blob.pathname.endsWith(".json"))
+      .map(async (blob) => {
+        const result = await get(blob.pathname, { access: "private", useCache: false });
+        if (!result || result.statusCode !== 200) {
+          throw new Error(`Failed to read song blob: ${blob.pathname}`);
+        }
+        return {
+          filename: blob.pathname,
+          song: parseSong(await new Response(result.stream).text()),
+        };
+      }));
+    entries.push(...songs);
+    cursor = result.hasMore ? result.cursor : undefined;
+  } while (cursor);
+  return entries;
+}
+
 async function readSongFiles(): Promise<{ filename: string; song: Song }[]> {
+  if (useBlobStorage) return readBlobSongs();
   let files: string[];
   try {
     files = await readdir(songsDirectory);
@@ -119,16 +160,19 @@ export async function getSong(id: number): Promise<Song | undefined> {
   await ensureLegacySongsMigrated();
   if (!Number.isSafeInteger(id) || id < 1) return undefined;
 
-  return (await readSongFiles()).find((entry) => entry.song.id === id)?.song;
+  const entries = useBlobStorage ? await readBlobSongs(`songs/${id}/`) : await readSongFiles();
+  return entries.find((entry) => entry.song.id === id)?.song;
 }
 
 export function createSong(song: Omit<Song, "id" | "createdAt" | "updatedAt">): Promise<Song> {
   return updateSongs(async () => {
-    const songs = await readSongs();
+    const songs = useBlobStorage ? [] : await readSongs();
     const now = new Date();
     const newSong: Song = {
       ...song,
-      id: songs.reduce((largestId, current) => Math.max(largestId, current.id), 0) + 1,
+      id: useBlobStorage
+        ? randomInt(1, 2 ** 48 - 1)
+        : songs.reduce((largestId, current) => Math.max(largestId, current.id), 0) + 1,
       createdAt: now,
       updatedAt: now,
     };
@@ -153,9 +197,11 @@ export function deleteSong(id: number): Promise<boolean> {
     await ensureLegacySongsMigrated();
     if (!Number.isSafeInteger(id) || id < 1) return false;
 
-    const entries = (await readSongFiles()).filter((entry) => entry.song.id === id);
+    const files = useBlobStorage ? await readBlobSongs(`songs/${id}/`) : await readSongFiles();
+    const entries = files.filter((entry) => entry.song.id === id);
     for (const entry of entries) {
-      await unlink(path.join(songsDirectory, entry.filename));
+      if (useBlobStorage) await del(entry.filename);
+      else await unlink(path.join(songsDirectory, entry.filename));
     }
     return entries.length > 0;
   });

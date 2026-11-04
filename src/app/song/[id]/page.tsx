@@ -4,6 +4,8 @@ import { Navigation } from "@/components/Navigation";
 import { SongDetailsClient } from "@/components/SongDetailsClient";
 import { getSong } from "@/lib/song-store";
 
+export const dynamic = "force-dynamic";
+
 export default async function SongDetailsPage({
   params,
 }: {
