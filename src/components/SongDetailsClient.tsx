@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 
 import { SongView } from "@/components/SongView";
+import { AutoScroll } from "@/components/AutoScroll";
 import { transposeChord } from "@/lib/chord-utils";
 import { SongControls } from "@/components/SongControls";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -43,63 +44,47 @@ export function SongDetailsClient({ song }: SongDetailsClientProps) {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-4xl">
+    <main className="container mx-auto px-4 pt-3 md:pt-8 pb-24 max-w-4xl">
       {/* Header Section */}
-      <div className="mb-6">
-        <Button
+      <div className="mb-3 md:mb-6">
+        <div className="mb-2 md:mb-4 flex items-center justify-between gap-2 no-print">
+          <Button
           variant="link"
           size="none"
-          className="mb-4 no-print"
           asChild
         >
           <Link href="/">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Library
           </Link>
-        </Button>
+          </Button>
+          <SongActions
+            songId={song.id}
+            onDelete={() => setShowDeleteDialog(true)}
+          />
+        </div>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-2 md:gap-4">
           <div className="space-y-1.5 flex-1 min-w-0">
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h1 className="text-3xl md:text-5xl font-bold text-foreground tracking-tight leading-tight">
-                {song.title}
-              </h1>
-              <p className="text-xl md:text-2xl font-medium text-muted-foreground truncate">
+            <h1 className="text-2xl md:text-5xl font-bold text-foreground tracking-tight leading-tight">
+              {song.title}
+            </h1>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs md:text-sm text-muted-foreground/80">
+              <p className="text-base md:text-2xl font-medium text-muted-foreground truncate">
                 by {song.artist}
               </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground/80">
-              {/* TODO {song.language && (
-                <div className="flex items-center gap-1.5 bg-secondary/50 px-2 py-0.5 rounded-full capitalize text-xs font-medium">
-                  <Globe className="w-3 h-3" />
-                  {song.language}
-                </div>
-              )} */}
-              <span className="hidden sm:inline text-muted-foreground/30">•</span>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-sm">
-                <span className="flex items-center gap-1.5" title="Added">
-                  <Calendar className="w-3.5 h-3.5" />
-                  Added {format(new Date(song.createdAt || Date.now()), 'MMM d, yyyy')}
+              <span className="inline-flex items-center gap-1 whitespace-nowrap" title="Added">
+                <Calendar className="w-3.5 h-3.5" />
+                Added {format(new Date(song.createdAt || Date.now()), 'MMM d, yyyy')}
+              </span>
+              {song.updatedAt && (
+                <span className="inline-flex items-center gap-1 whitespace-nowrap" title="Updated">
+                  <Clock className="w-3.5 h-3.5" />
+                  Updated {format(new Date(song.updatedAt), 'MMM d, yyyy')}
                 </span>
-                {song.updatedAt && (
-                  <>
-                    <span className="hidden sm:inline text-muted-foreground/30">•</span>
-                    <span className="flex items-center gap-1.5 text-muted-foreground/80" title="Updated">
-                      <Clock className="w-3.5 h-3.5" />
-                      Updated {format(new Date(song.updatedAt), 'MMM d, yyyy')}
-                    </span>
-                  </>
-                )}
-              </div>
+              )}
             </div>
           </div>
 
-          <div className="flex-shrink-0 pt-2 md:pt-0">
-            <SongActions
-              songId={song.id}
-              onDelete={() => setShowDeleteDialog(true)}
-            />
-          </div>
         </div>
       </div>
 
@@ -112,7 +97,7 @@ export function SongDetailsClient({ song }: SongDetailsClientProps) {
       />
 
       {/* Song Content */}
-      <div className="bg-card rounded-3xl p-6 md:p-10 shadow-sm border border-border w-full overflow-hidden min-h-[300px]">
+      <div className="w-full overflow-hidden min-h-[300px]">
         <SongView
           lines={song.structuredContent}
           transpose={transpose}
@@ -120,6 +105,7 @@ export function SongDetailsClient({ song }: SongDetailsClientProps) {
       </div>
 
       {/* Delete Dialog */}
+      <AutoScroll key={song.id} />
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}

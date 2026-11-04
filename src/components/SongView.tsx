@@ -31,7 +31,7 @@ function LineRenderer({ line, transpose, index }: { line: SongLine; transpose: n
     if (line.type === 'heading') {
       return (
         <div 
-          className="pt-6 pb-2 font-bold text-2xl text-primary"
+          className="pt-4 pb-1 font-bold text-2xl text-primary"
         >
           {line.content}
         </div>
@@ -39,7 +39,7 @@ function LineRenderer({ line, transpose, index }: { line: SongLine; transpose: n
     }
 
     if (line.type === 'empty') {
-      return <div className="h-4" />;
+      return <div className="h-2" />;
     }
 
     const sortedChords = [...line.chords].sort((a, b) => a.position - b.position);
@@ -47,7 +47,7 @@ function LineRenderer({ line, transpose, index }: { line: SongLine; transpose: n
     if (sortedChords.length === 0) {
       return (
         <div 
-          className="text-foreground/80 leading-relaxed whitespace-pre-wrap break-words"
+          className="text-foreground/80 leading-snug whitespace-pre-wrap break-words"
         >
           {line.content || " "}
         </div>
@@ -56,10 +56,10 @@ function LineRenderer({ line, transpose, index }: { line: SongLine; transpose: n
     
     return (
       <div 
-        className="relative mt-12 mb-6 group"
+        className="relative pt-6 pb-1 group"
       >
         {/* Lyrics Line */}
-        <div className="text-foreground/90 whitespace-pre-wrap leading-relaxed font-medium pt-1 break-words">
+        <div className="text-foreground/90 whitespace-pre-wrap leading-snug font-medium break-words">
           {line.content || "\u00A0"}
         </div>
         
@@ -69,7 +69,7 @@ function LineRenderer({ line, transpose, index }: { line: SongLine; transpose: n
             return (
               <span 
                 key={i}
-                className="absolute -top-8 text-blue-600 dark:text-blue-400 font-bold text-base transition-colors duration-300"
+                className="absolute top-0 text-blue-600 dark:text-blue-400 font-bold text-base transition-colors duration-300"
                 style={{ left: `${chordBlock.position}ch` }}
               >
                 {transposedChord}

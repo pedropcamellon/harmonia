@@ -1,15 +1,15 @@
 {
 	"folders": [
 		{
+			"name": "Harmonia",
 			"path": "."
+		},
+		{
+			"name": "Tasks",
+			"path": "../tasks"
 		}
 	],
 	"settings": {
-		"chat.checkpoints.showFileChanges": true,
-		"github.copilot.chat.codeGeneration.instructions": [
-			{
-				"file": ".github/copilot_plans/active_plan.instructions.md"
-			}
-		]
+		"chat.checkpoints.showFileChanges": true
 	}
 }

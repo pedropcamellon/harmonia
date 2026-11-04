@@ -3,12 +3,22 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: development
     container_name: harmonia-app
     restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
-      - harmonia_data:/app/data
-
-volumes:
-  harmonia_data:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./data:/app/data
+    develop:
+      watch:
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./pnpm-lock.yaml
+        - action: rebuild
+          path: ./next.config.ts
+        - action: rebuild
+          path: ./Dockerfile

@@ -13,6 +13,13 @@ COPY package.json pnpm-lock.yaml ./
 
 RUN pnpm install --frozen-lockfile
 
+FROM deps AS development
+COPY . .
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+EXPOSE 3000
+CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app

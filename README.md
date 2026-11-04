@@ -18,6 +18,13 @@ A modern chord management and songbook application built with Next.js 15, featur
 - 📝 Song library management
 - 🎨 Modern, responsive UI
 - 🖨️ Print-friendly song sheets
+- Compact chord/lyric spacing and adjustable autoscroll (10-100 pixels/second)
+- Compact mobile song list with inline artist/title information and key badges
+
+On a song page, use the compact bottom-right Autoscroll control to start or pause scrolling.
+The minus/plus buttons adjust speed in 5 px/s steps. Print, Edit, and Delete are in the three-dot menu beside Back to Library.
+The compact Key button opens transpose controls; song content is displayed without a surrounding card.
+Manual wheel/touch scrolling, navigation keys, hiding the tab, or reaching the page bottom pauses it automatically.
 
 ## Getting Started
 
@@ -53,13 +60,21 @@ Each song is stored in its own `artist-title.json` file under `data/songs/`. Nam
 
 ### Docker
 
-Run the production container with persistent storage:
+Run the development container with hot reload and persistent storage:
 
 ```bash
 docker compose up --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Docker Compose stores songs in the `harmonia_data` named volume. To remove the container and its song data, run `docker compose down --volumes`.
+Open [http://localhost:3000](http://localhost:3000). Source and public files are bind-mounted, so Next.js watches source edits and hot-reloads automatically. Songs are bind-mounted in the local `data/` directory and survive container recreation or `docker compose down`.
+
+To also rebuild automatically when dependencies or Docker/Next configuration change, run:
+
+```bash
+docker compose up --build --watch
+```
+
+The Dockerfile's default final target remains the production image; Compose selects the `development` target.
 
 ## Scripts
 
