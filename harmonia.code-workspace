@@ -6,7 +6,7 @@
 		},
 		{
 			"name": "Tasks",
-			"path": "../tasks"
+			"path": "../harmonia-tasks"
 		}
 	],
 	"settings": {
