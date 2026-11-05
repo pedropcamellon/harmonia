@@ -121,11 +121,15 @@ export function parseRawContent(raw: string): SongLine[] {
             const nextLine = lines[i + 1];
             // Check if next line is a lyric line (exists and is NOT a chord line)
             if (nextLine !== undefined && !isChordLine(nextLine) && !nextLine.trim().startsWith('[')) {
+                const lyricIndentation = nextLine.match(/^\s*/)?.[0].length ?? 0;
+                const chordIndentation = line.match(/^\s*/)?.[0].length ?? 0;
+                const indentationToRemove = Math.min(lyricIndentation, chordIndentation);
+
                 // Merge chord line with next lyric line
                 structured.push({
                     type: 'lyric',
-                    content: nextLine,
-                    chords: extractChords(line)
+                    content: nextLine.slice(lyricIndentation),
+                    chords: extractChords(line.slice(indentationToRemove))
                 });
                 i++; // Skip next line since we consumed it
             } else {
@@ -143,7 +147,7 @@ export function parseRawContent(raw: string): SongLine[] {
             } else if (line.trim() === '') {
                 structured.push({ type: 'empty', content: '', chords: [] });
             } else {
-                structured.push({ type: 'lyric', content: line, chords: [] });
+                structured.push({ type: 'lyric', content: line.trimStart(), chords: [] });
             }
         }
     }
